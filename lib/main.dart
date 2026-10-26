@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'calculator_logic.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,19 +33,43 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String display = '';
+  String first = '';
+  String op = '';
+  String second = '';
+
+  CalculatorLogic logic = CalculatorLogic();
+  String result = '';
 
   void addDigit(String digit) {
     setState(() {
-      display = display + digit;
+        if (op == '') {
+                first = first + digit;
+            } else {
+                second = second + digit;
+        }
+    });
+  }
+
+  void addOp(String o) {
+    setState(() {
+      op = o;
     });
   }
 
   void clearDigit() {
     setState(() {
-      display = '';
+      first = '';
+      op = '';
+      second = '';
+      result = '';
     });
   }
+
+  void equals() {
+    setState(() {
+        result = logic.calculate(first, op, second);
+    });
+    }
 
   Widget makeButton(String text, void Function() onTap) {
     return Expanded(
@@ -76,8 +101,16 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Container(
                 alignment: .bottomRight,
                 padding: EdgeInsets.all(16),
-                child: Text(display, style: TextStyle(fontSize: 48)),
-              ),
+
+              child: Column(
+                crossAxisAlignment: .end,
+                mainAxisAlignment: .end,
+                    children: [
+                        Text(first + op + second, style: TextStyle(fontSize: 32)),
+                        Text(result, style: TextStyle(fontSize: 48)),
+                    ],
+                ),
+            ),
             ),
 
             Expanded(
@@ -87,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   makeButton('C', () { clearDigit(); }),
                   makeButton('+/-', () { addDigit('+/-'); }),
                   makeButton('%', () { addDigit('%'); }),
-                  makeButton('÷', () { addDigit('÷'); }),
+                  makeButton('÷', () { addOp('÷'); }),
                 ],
               ),
             ),
@@ -98,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   makeButton('7', () { addDigit('7'); }),
                   makeButton('8', () { addDigit('8'); }),
                   makeButton('9', () { addDigit('9'); }),
-                  makeButton('×', () { addDigit('×'); }),
+                  makeButton('×', () { addOp('×'); }),
                 ],
               ),
             ),
@@ -109,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   makeButton('4', () { addDigit('4'); }),
                   makeButton('5', () { addDigit('5'); }),
                   makeButton('6', () { addDigit('6'); }),
-                  makeButton('-', () { addDigit('-'); }),
+                  makeButton('-', () { addOp('-'); }),
                 ],
               ),
             ),
@@ -120,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   makeButton('1', () { addDigit('1'); }),
                   makeButton('2', () { addDigit('2'); }),
                   makeButton('3', () { addDigit('3'); }),
-                  makeButton('+', () { addDigit('+'); }),
+                  makeButton('+', () { addOp('+'); }),
                 ],
               ),
             ),
@@ -130,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   makeButton('0', () { addDigit('0'); }),
                   makeButton('.', () { addDigit('.'); }),
-                  makeButton('=', () { addDigit('='); }),
+                  makeButton('=', () { equals(); }),
                 ],
               ),
             ),
