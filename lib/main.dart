@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'calculator_logic.dart';
 
 void main() {
@@ -42,17 +43,71 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void addDigit(String digit) {
     setState(() {
-        if (op == '') {
-                first = first + digit;
-            } else {
-                second = second + digit;
+      if (result != '') {
+        clearDigit();
+      }
+      if (op == '') {
+        if (first.length > 16) {
+          return;
         }
+        if (first.contains('.') && digit == '.') {
+          return;
+        }
+        if (first == '' && digit == '.') {
+          first = '0';
+        }
+        first = first + digit;
+      } else {
+        if (second.length > 16) {
+          return;
+        }
+        if (second.contains('.') && digit == '.') {
+          return;
+        }
+        if (second == '' && digit == '.') {
+          second = '0';
+        }
+        second = second + digit;
+      }
     });
   }
 
   void addOp(String o) {
     setState(() {
+      if (first == '') {
+        return;
+      }
+      if (result == 'ошибка') {
+        clearDigit();
+        return;
+      }
+      if (result != '') {
+        first = result;
+        second = '';
+        result = '';
+      }
       op = o;
+    });
+  }
+
+  void changeSign() {
+    setState(() {
+      if (result != '') {
+        return;
+      }
+      if (op == '' && first.isNotEmpty) {
+        if (first.startsWith('-')) {
+          first = first.substring(1);
+        } else {
+          first = '-' + first;
+        }
+      } else if (op.isNotEmpty && second.isNotEmpty) {
+        if (second.startsWith('-')) {
+          second = second.substring(1);
+        } else {
+          second = '-' + second;
+        }
+      }
     });
   }
 
@@ -67,17 +122,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void equals() {
     setState(() {
-        result = logic.calculate(first, op, second);
+      result = logic.calculate(first, op, second);
     });
-    }
+  }
 
-  Widget makeButton(String text, void Function() onTap) {
+  Widget makeButton(
+    String text,
+    void Function() onTap, {
+    Color color = const Color.fromARGB(255, 240, 240, 240),
+    Color textColor = Colors.black,
+  }) {
     return Expanded(
       child: Padding(
         padding: EdgeInsets.all(4),
         child: ElevatedButton(
           onPressed: onTap,
-          child: Text(text),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            foregroundColor: textColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(90),
+            ),
+          ),
+          child: Text(text, style: TextStyle(fontSize: 24)),
         ),
       ),
     );
@@ -91,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         title: Text(widget.title),
       ),
-      body: Center(
+      body: SafeArea(
         child: Column(
           // mainAxisAlignment: .center,
 
@@ -102,25 +169,50 @@ class _MyHomePageState extends State<MyHomePage> {
                 alignment: .bottomRight,
                 padding: EdgeInsets.all(16),
 
-              child: Column(
-                crossAxisAlignment: .end,
-                mainAxisAlignment: .end,
-                    children: [
-                        Text(first + op + second, style: TextStyle(fontSize: 32)),
-                        Text(result, style: TextStyle(fontSize: 48)),
-                    ],
+                child: Column(
+                  crossAxisAlignment: .end,
+                  mainAxisAlignment: .end,
+                  children: [
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: .centerRight,
+                        child: Text(
+                          first + op + second,
+                          style: TextStyle(fontSize: 32),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: .centerRight,
+                        child: Text(result, style: TextStyle(fontSize: 48)),
+                      ),
+                    ),
+                  ],
                 ),
-            ),
+              ),
             ),
 
             Expanded(
               child: Row(
                 crossAxisAlignment: .stretch,
                 children: [
-                  makeButton('C', () { clearDigit(); }),
-                  makeButton('+/-', () { addDigit('+/-'); }),
-                  makeButton('%', () { addDigit('%'); }),
-                  makeButton('÷', () { addOp('÷'); }),
+                  makeButton('C', () {
+                    clearDigit();
+                  }, color: Colors.grey.shade400),
+                  makeButton('+/-', () {
+                    changeSign();
+                  }, color: Colors.grey.shade400),
+                  makeButton(
+                    '÷',
+                    () {
+                      addOp('÷');
+                    },
+                    color: Colors.orange,
+                    textColor: Colors.white,
+                  ),
                 ],
               ),
             ),
@@ -128,10 +220,23 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 crossAxisAlignment: .stretch,
                 children: [
-                  makeButton('7', () { addDigit('7'); }),
-                  makeButton('8', () { addDigit('8'); }),
-                  makeButton('9', () { addDigit('9'); }),
-                  makeButton('×', () { addOp('×'); }),
+                  makeButton('7', () {
+                    addDigit('7');
+                  }),
+                  makeButton('8', () {
+                    addDigit('8');
+                  }),
+                  makeButton('9', () {
+                    addDigit('9');
+                  }),
+                  makeButton(
+                    '×',
+                    () {
+                      addOp('×');
+                    },
+                    color: Colors.orange,
+                    textColor: Colors.white,
+                  ),
                 ],
               ),
             ),
@@ -139,10 +244,23 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 crossAxisAlignment: .stretch,
                 children: [
-                  makeButton('4', () { addDigit('4'); }),
-                  makeButton('5', () { addDigit('5'); }),
-                  makeButton('6', () { addDigit('6'); }),
-                  makeButton('-', () { addOp('-'); }),
+                  makeButton('4', () {
+                    addDigit('4');
+                  }),
+                  makeButton('5', () {
+                    addDigit('5');
+                  }),
+                  makeButton('6', () {
+                    addDigit('6');
+                  }),
+                  makeButton(
+                    '-',
+                    () {
+                      addOp('-');
+                    },
+                    color: Colors.orange,
+                    textColor: Colors.white,
+                  ),
                 ],
               ),
             ),
@@ -150,10 +268,23 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 crossAxisAlignment: .stretch,
                 children: [
-                  makeButton('1', () { addDigit('1'); }),
-                  makeButton('2', () { addDigit('2'); }),
-                  makeButton('3', () { addDigit('3'); }),
-                  makeButton('+', () { addOp('+'); }),
+                  makeButton('1', () {
+                    addDigit('1');
+                  }),
+                  makeButton('2', () {
+                    addDigit('2');
+                  }),
+                  makeButton('3', () {
+                    addDigit('3');
+                  }),
+                  makeButton(
+                    '+',
+                    () {
+                      addOp('+');
+                    },
+                    color: Colors.orange,
+                    textColor: Colors.white,
+                  ),
                 ],
               ),
             ),
@@ -161,9 +292,20 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Row(
                 crossAxisAlignment: .stretch,
                 children: [
-                  makeButton('0', () { addDigit('0'); }),
-                  makeButton('.', () { addDigit('.'); }),
-                  makeButton('=', () { equals(); }),
+                  makeButton('0', () {
+                    addDigit('0');
+                  }),
+                  makeButton('.', () {
+                    addDigit('.');
+                  }),
+                  makeButton(
+                    '=',
+                    () {
+                      equals();
+                    },
+                    color: Colors.deepOrange,
+                    textColor: Colors.white,
+                  ),
                 ],
               ),
             ),
