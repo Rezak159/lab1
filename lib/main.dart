@@ -111,6 +111,50 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void applyFunc(String f) {
+    setState(() {
+      if (result == 'ошибка') {
+        return;
+      }
+      if (result != '') {
+        first = result;
+        op = '';
+        second = '';
+        result = '';
+      }
+
+      String number = '';
+      if (op == '') {
+        number = first;
+      } else {
+        number = second;
+      }
+      if (number == '') {
+        return;
+      }
+
+      String answer = '';
+      if (f == 'sin') {
+        answer = logic.sinDeg(number);
+      } else if (f == 'cos') {
+        answer = logic.cosDeg(number);
+      } else if (f == '!') {
+        answer = logic.factorial(number);
+      }
+
+      if (answer == 'ошибка') {
+        result = answer;
+        return;
+      }
+
+      if (op == '') {
+        first = answer;
+      } else {
+        second = answer;
+      }
+    });
+  }
+
   void clearDigit() {
     setState(() {
       first = '';
@@ -195,6 +239,22 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
 
+            Expanded(
+              child: Row(
+                crossAxisAlignment: .stretch,
+                children: [
+                  makeButton('sin', () {
+                    applyFunc('sin');
+                  }, color: Colors.grey.shade400),
+                  makeButton('cos', () {
+                    applyFunc('cos');
+                  }, color: Colors.grey.shade400),
+                  makeButton('n!', () {
+                    applyFunc('!');
+                  }, color: Colors.grey.shade400),
+                ],
+              ),
+            ),
             Expanded(
               child: Row(
                 crossAxisAlignment: .stretch,
